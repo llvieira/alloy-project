@@ -39,7 +39,6 @@ sig Jogador{
 fact LimiteTimes{
 	#Campeonato = 1
 	#Time = 2
---	#jogadores =< 24
 	all t: Time | one t.~times
 	all t: Time | some t.jogadores
 	all t: Time | #t.jogadores >= 6 && #t.jogadores =< 12

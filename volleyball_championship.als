@@ -5,18 +5,24 @@ one sig Campeonato {
 }
 
 sig Time {
-	jogadores: some Jogador,
+	jogadoresTitulares: set JogadorTitular,
+	jogadoresReservas: set JogadorReserva,
 	regiao: one Regiao
 }
 
-sig Jogador{
-	idade: one Idade,
+
+abstract sig  Jogador{
+--	idade: one Int,
 	regiao: one Regiao
 }
 
-sig Idade {
-	valor: one Int
-}
+sig JogadorTitular extends Jogador {}
+
+sig JogadorReserva extends Jogador {}
+
+--sig Idade {
+--	valor: one Int
+--}
 
 abstract sig Regiao{
 }
@@ -38,21 +44,23 @@ one sig Centro extends Regiao {
 
 fact LimiteTimes{
 	#Campeonato = 1
-	#Time = 4
+	#Time = 2
 
 --  Fatos dos times
 	all t: Time | one t.~times
-	all t: Time | some t.jogadores
+--	all t: Time | some t.jogadores
 	all t: Time | one t.regiao
-	all t: Time | #t.jogadores >= 2 && #t.jogadores =< 3
+	all t: Time | #(t.jogadoresTitulares) = 1
+	all t: Time | #t.jogadoresReservas >= 2 && #t.jogadoresReservas =< 3
 
 -- Fatos dos jogadores
-	all j: Jogador | one j.~jogadores
+	all j: JogadorTitular | one j.~jogadoresTitulares
+	all j: JogadorReserva | one j.~jogadoresReservas
 	all j: Jogador | one j.regiao
-	all j: Jogador, t: Time | j in t.jogadores => j.regiao = t.regiao
-
+	all j: Jogador, t: Time | (j in t.jogadoresTitulares => j.regiao = t.regiao) 
+	&& (j in t.jogadoresReservas => j.regiao = t.regiao)
 -- Fatos das idades
-	all i: Idade | one i.~idade
+--	all i: Idade | one i.~idade
 }
 
 pred show[] {}

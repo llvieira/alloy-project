@@ -1,13 +1,18 @@
 module volleyball
 
 one sig Campeonato {
-	times: set Time
+	jogos: set Jogo
 }
 
 sig Time {
 	jogadoresTitulares: set JogadorTitular,
 	jogadoresReservas: set JogadorReserva,
 	regiao: one Regiao
+}
+
+sig Jogo {
+	timeCasa: one Time,
+	timeFora: one Time,
 }
 
 
@@ -44,11 +49,10 @@ one sig Centro extends Regiao {
 
 fact LimiteTimes{
 	#Campeonato = 1
-	#Time = 2
+	#Time = 4
 
 --  Fatos dos times
-	all t: Time | one t.~times
---	all t: Time | some t.jogadores
+	all t: Time | one (t.~timeCasa + t.~timeFora)
 	all t: Time | one t.regiao
 	all t: Time | #(t.jogadoresTitulares) = 1
 	all t: Time | #t.jogadoresReservas >= 2 && #t.jogadoresReservas =< 3
@@ -61,6 +65,12 @@ fact LimiteTimes{
 	&& (j in t.jogadoresReservas => j.regiao = t.regiao)
 -- Fatos das idades
 --	all i: Idade | one i.~idade
+
+-- Fatos dos Jogos
+
+	all j: Jogo | one j.~jogos
+	all j: Jogo, t1: Time, t2: Time | (t1 in j.timeCasa && t2 in j.timeFora => t1.regiao = t2.regiao && t1 != t2) 
+
 }
 
 pred show[] {}

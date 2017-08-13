@@ -1,5 +1,8 @@
 module volleyball
 
+
+-- ASSINATURAS
+
 one sig Campeonato {
 	jogos: set Jogo
 }
@@ -11,8 +14,8 @@ sig Time {
 }
 
 sig Jogo {
-	timeCasa: one Time,
-	timeFora: one Time,
+	timeMandante: one Time,
+	timeVisitante: one Time,
 }
 
 
@@ -42,31 +45,86 @@ one sig Oeste extends Regiao {
 one sig Centro extends Regiao {
 }
 
-fact LimiteTimes{
+-- FATOS
+
+fact TimeFatos{
+
 	#Campeonato = 1
 	#Time = 4
 
---  Fatos dos times
-	all t: Time | one (t.~timeCasa + t.~timeFora)
+	all t: Time | one (t.~timeMandante + t.~timeVisitante)
 	all t: Time | one t.regiao
-	all t: Time | #(t.jogadoresTitulares) = 1
-	all t: Time | #t.jogadoresReservas >= 2 && #t.jogadoresReservas =< 3
-
--- Fatos dos jogadores
-	all j: JogadorMaiorIdade | one (j.~jogadoresTitulares + j.~jogadoresReservas)
-	all j: JogadorMenorIdade, t: Time | not (j in t.jogadoresTitulares || j in t.jogadoresReservas )
-	all j: JogadorMaiorIdade, t: Time | not (j in t.jogadoresTitulares && j in t.jogadoresReservas)
-	all j: Jogador | one j.regiao
-	all j: Jogador, t: Time | (j in t.jogadoresTitulares => j.regiao = t.regiao) 
-	&& (j in t.jogadoresReservas => j.regiao = t.regiao)
-
--- Fatos dos Jogos
-
-	all j: Jogo | one j.~jogos
-	all j: Jogo, t1: Time, t2: Time | (t1 in j.timeCasa && t2 in j.timeFora => t1.regiao = t2.regiao && t1 != t2) 
+	all t: Time | #(getJogadoresTitulares[t]) = 1
+	all t: Time | #(getJogadoresReservas[t]) >= 2 && #(getJogadoresReservas[t]) =< 3
 
 }
 
-pred show[] {}
+fact JogadorFatos {
+
+	all j: JogadorMaiorIdade | one (j.~jogadoresTitulares + j.~jogadoresReservas)
+	all j: JogadorMenorIdade, t: Time | not ( jogadorEhTitular[j, t] || jogadorEhReserva[j, t] )
+	all j: JogadorMaiorIdade, t: Time | not ( jogadorEhTitular[j, t] && jogadorEhReserva[j, t] )
+	all j: Jogador | one j.regiao
+	all j: Jogador, t: Time | ( jogadorNoTime[j, t] => j.regiao = t.regiao)
+}
+
+fact JogoFatos {
+
+	all j: Jogo | one j.~jogos
+	all j: Jogo, t1: Time, t2: Time | ( timeEhMandante[j, t1] && timeEhVisitante[j, t2] => t1.regiao = t2.regiao && t1 != t2) 
+}
+
+
+-- PREDICADOS 
+
+pred jogadorNoTime[j: Jogador, t: Time] {
+	j in getJogadores[t]
+}
+
+pred jogadorEhTitular[j: Jogador, t: Time] {
+	j in getJogadoresTitulares[t]
+}
+
+pred jogadorEhReserva[j: Jogador, t: Time]{
+	j in getJogadoresReservas[t]
+}
+
+pred timeEhMandante[j: Jogo, t: Time]{
+	t in getTimeMandante[j]
+}
+
+pred timeEhVisitante[j: Jogo, t: Time]{
+	t in getTimeVisitante[j]
+}
+
+
+
+-- FUNÇOES
+
+fun getJogadores[t: Time] : set Jogador {
+	t.jogadoresTitulares + t.jogadoresReservas
+}
+
+fun getJogadoresTitulares[t: Time] : set Jogador {
+	t.jogadoresTitulares
+}
+
+fun getJogadoresReservas[t: Time] : set Jogador {
+	t.jogadoresReservas
+}
+
+fun getTimeMandante[j: Jogo] : one Time{
+	j.timeMandante
+}
+
+fun getTimeVisitante[j: Jogo] :  one Time{
+	j.timeVisitante
+}
+
+
+
+
+pred show[] { }
+
 
 run show for 25

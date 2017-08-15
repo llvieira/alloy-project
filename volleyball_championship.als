@@ -50,12 +50,12 @@ one sig Centro extends Regiao {
 fact TimeFatos{
 
 	#Campeonato = 1
-	#Time = 4
+	#Time = 6
 
 	all t: Time | one (t.~timeMandante + t.~timeVisitante)
 	all t: Time | one t.regiao
-	all t: Time | #(getJogadoresTitulares[t]) = 1
-	all t: Time | #(getJogadoresReservas[t]) >= 2 && #(getJogadoresReservas[t]) =< 3
+	all t: Time | #(getJogadoresTitulares[t]) = 6
+	all t: Time | #(getJogadoresReservas[t]) >= 0 && #(getJogadoresReservas[t]) =< 6
 
 }
 
@@ -121,10 +121,39 @@ fun getTimeVisitante[j: Jogo] :  one Time{
 	j.timeVisitante
 }
 
-
-
-
 pred show[] { }
 
+run show for 50
 
-run show for 25
+assert todoTimeTemJogador {
+	all t: Time | #(getJogadoresTitulares[t]) = 6
+	all t: Time | #(getJogadoresReservas[t]) >= 0 && #(getJogadoresReservas[t]) =< 6
+}
+
+assert todoJogoTemDoisTimes {
+	all j: Jogo | one j.timeMandante
+	all j: Jogo | one j.timeVisitante 
+}
+
+assert todoTimeDoJogoEhDaMesmaRegiao {
+	all j: Jogo, t1: Time, t2: Time | ( timeEhMandante[j, t1] && timeEhVisitante[j, t2] => t1.regiao = t2.regiao && t1 != t2) 
+}
+
+assert todoJogadorTemAMesmaRegiaoDoTime {
+	all j: Jogador, t: Time | ( jogadorNoTime[j, t] => j.regiao = t.regiao)
+}
+
+assert todoJogadorMaiorIdadeTemTime {
+	all j: JogadorMaiorIdade | one (j.~jogadoresReservas + j.~jogadoresTitulares)
+}
+
+assert todoJogadorMenorIdadeNaoTemTime {
+	all j: JogadorMenorIdade, t: Time | not (j in t.jogadoresReservas ||  j in t.jogadoresTitulares)
+}
+
+check todoTimeTemJogador for 50
+check todoJogoTemDoisTimes for 50
+check todoTimeDoJogoEhDaMesmaRegiao for 50
+check todoJogadorTemAMesmaRegiaoDoTime for 50
+check todoJogadorMaiorIdadeTemTime for 50
+check todoJogadorMenorIdadeNaoTemTime for 50

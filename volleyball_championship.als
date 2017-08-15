@@ -121,9 +121,18 @@ fun getTimeVisitante[j: Jogo] :  one Time{
 	j.timeVisitante
 }
 
+
+-- CRIAÇAO DO DIAGRAMA
+
 pred show[] { }
 
 run show for 50
+
+--TESTES
+
+assert todoJogoPertenceAoCampeonato {
+	all t: Time | one (t.~timeMandante + t.~timeVisitante)
+}
 
 assert todoTimeTemJogador {
 	all t: Time | #(getJogadoresTitulares[t]) = 6
@@ -151,9 +160,12 @@ assert todoJogadorMenorIdadeNaoTemTime {
 	all j: JogadorMenorIdade, t: Time | not (j in t.jogadoresReservas ||  j in t.jogadoresTitulares)
 }
 
+check todoJogoPertenceAoCampeonato for 50
 check todoTimeTemJogador for 50
 check todoJogoTemDoisTimes for 50
 check todoTimeDoJogoEhDaMesmaRegiao for 50
 check todoJogadorTemAMesmaRegiaoDoTime for 50
 check todoJogadorMaiorIdadeTemTime for 50
 check todoJogadorMenorIdadeNaoTemTime for 50
+
+

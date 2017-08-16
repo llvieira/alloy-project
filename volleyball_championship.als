@@ -1,5 +1,22 @@
 module volleyball
 
+------------------------------------------------------------------------
+-- PROJETO ALLOY: CAMPEONATO DE VOLEI
+
+-- GRUPO: 4
+
+--	ANTONIO PEDRO
+--	LUCAS VIEIRA
+--	LUIZ FERNANDO
+--	RONAN SOUZA
+-- 	RONNYLDO SILVA
+
+-- CLIENTE: JOAO LUCAS
+
+-- PROFESSOR: TIAGO MASSONI
+
+-------------------------------------------------------------------------
+
 
 -- ASSINATURAS
 
@@ -65,13 +82,13 @@ fact JogadorFatos {
 	all j: JogadorMenorIdade, t: Time | not ( jogadorEhTitular[j, t] || jogadorEhReserva[j, t] )
 	all j: JogadorMaiorIdade, t: Time | not ( jogadorEhTitular[j, t] && jogadorEhReserva[j, t] )
 	all j: Jogador | one j.regiao
-	all j: Jogador, t: Time | ( jogadorNoTime[j, t] => j.regiao = t.regiao)
+	all j: Jogador, t: Time | ( jogadorNoTime[j, t] => saoDaMesmaRegiao[t, j])
 }
 
 fact JogoFatos {
 
 	all j: Jogo | one j.~jogos
-	all j: Jogo, t1: Time, t2: Time | ( timeEhMandante[j, t1] && timeEhVisitante[j, t2] => t1.regiao = t2.regiao && t1 != t2) 
+	all j: Jogo, t1: Time, t2: Time | ( timeEhMandante[j, t1] && timeEhVisitante[j, t2] =>  saoDaMesmaRegiao[t1, t2] && t1 != t2) 
 }
 
 
@@ -95,6 +112,14 @@ pred timeEhMandante[j: Jogo, t: Time]{
 
 pred timeEhVisitante[j: Jogo, t: Time]{
 	t in getTimeVisitante[j]
+}
+
+pred saoDaMesmaRegiao[t1: Time, t2: Time]{
+	t1.regiao = t2.regiao
+}
+
+pred saoDaMesmaRegiao[t: Time, j: Jogador]{
+	t.regiao = j.regiao
 }
 
 
